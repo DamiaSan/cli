@@ -23,12 +23,14 @@ func (c *YumPackageManager) UpdatePackageList() (string, error) {
 }
 
 // InstallPackage executes the installation command
-func (c *YumPackageManager) InstallPackage(name string) (string, error) {
+// first indicates if this is the first package being installed in the current session
+func (c *YumPackageManager) InstallPackage(name string, first bool) (string, error) {
 	return c.executor.Execute([]string{}, "yum", []string{"install", name, "-y"}, commontypes.ExecuteNoTimeout)
 }
 
 // UninstallPackage executes the uninstallation command
-func (c *YumPackageManager) UninstallPackage(name string) (string, error) {
+// first indicates if this is the first package being uninstalled in the current session
+func (c *YumPackageManager) UninstallPackage(name string, first bool) (string, error) {
 	return c.executor.Execute([]string{}, "yum", []string{"remove", name, "-y"}, commontypes.ExecuteNoTimeout)
 }
 
@@ -66,4 +68,9 @@ func (c *YumPackageManager) GetServiceStatus(name string) (string, error) {
 // CheckPackageInstalled checks if a package is installed
 func (c *YumPackageManager) CheckPackageInstalled(name string) (string, error) {
 	return c.executor.Execute([]string{}, "rpm", []string{"-q", name}, commontypes.ExecuteNoTimeout)
+}
+
+// NeedReboot tells if a reboot is needed after package installation
+func (c *YumPackageManager) NeedReboot() bool {
+	return false
 }

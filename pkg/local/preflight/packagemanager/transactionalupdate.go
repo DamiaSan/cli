@@ -27,13 +27,33 @@ func (c *TransactionalUpdatePackageManager) UpdatePackageList() (string, error) 
 }
 
 // InstallPackage executes the installation command
-func (c *TransactionalUpdatePackageManager) InstallPackage(name string) (string, error) {
-	return c.executor.Execute([]string{}, packageCommand, []string{"--non-interactive", "pkg", "install", name}, commontypes.ExecuteNoTimeout)
+// first indicates if this is the first package being installed in the current session
+// Note: Subsequent package installations in the same session must use first=false
+// to continue the existing transaction using the --continue flag
+func (c *TransactionalUpdatePackageManager) InstallPackage(name string, first bool) (string, error) {
+	var args []string
+
+	if first {
+		args = []string{"--non-interactive", "pkg", "install", name}
+	} else {
+		args = []string{"--continue", "--non-interactive", "pkg", "install", name}
+	}
+	return c.executor.Execute([]string{}, packageCommand, args, commontypes.ExecuteNoTimeout)
 }
 
 // UninstallPackage executes the uninstallation command
-func (c *TransactionalUpdatePackageManager) UninstallPackage(name string) (string, error) {
-	return c.executor.Execute([]string{}, packageCommand, []string{"--non-interactive", "pkg", "remove", name}, commontypes.ExecuteNoTimeout)
+// first indicates if this is the first package being uninstalled in the current session
+// Note: Subsequent package disinstallations in the same session must use first=false
+// to continue the existing transaction using the --continue flag
+func (c *TransactionalUpdatePackageManager) UninstallPackage(name string, first bool) (string, error) {
+	var args []string
+
+	if first {
+		args = []string{"--non-interactive", "pkg", "remove", name}
+	} else {
+		args = []string{"--continue", "--non-interactive", "pkg", "remove", name}
+	}
+	return c.executor.Execute([]string{}, packageCommand, args, commontypes.ExecuteNoTimeout)
 }
 
 // Execute executes the given command with the specified environment variables, binary, and arguments.
@@ -70,4 +90,12 @@ func (c *TransactionalUpdatePackageManager) GetServiceStatus(name string) (strin
 // CheckPackageInstalled checks if a package is installed
 func (c *TransactionalUpdatePackageManager) CheckPackageInstalled(name string) (string, error) {
 	return c.executor.Execute([]string{}, "rpm", []string{"-q", name}, commontypes.ExecuteNoTimeout)
+}
+
+// NeedReboot tells if a reboot is needed after package installation
+// Note: SLE Micro OS always requires a reboot after package installation
+// to ensure newly installed packages are properly integrated into the
+// system's operational environment
+func (c *TransactionalUpdatePackageManager) NeedReboot() bool {
+	return true
 }

@@ -24,12 +24,14 @@ func (c *AptPackageManager) UpdatePackageList() (string, error) {
 }
 
 // InstallPackage executes the installation command
-func (c *AptPackageManager) InstallPackage(name string) (string, error) {
+// first indicates if this is the first package being installed in the current session
+func (c *AptPackageManager) InstallPackage(name string, first bool) (string, error) {
 	return c.executor.Execute([]string{}, "apt", []string{"install", name, "-y"}, commontypes.ExecuteNoTimeout)
 }
 
 // UninstallPackage executes the uninstallation command
-func (c *AptPackageManager) UninstallPackage(name string) (string, error) {
+// first indicates if this is the first package being uninstalled in the current session
+func (c *AptPackageManager) UninstallPackage(name string, first bool) (string, error) {
 	return c.executor.Execute([]string{}, "apt", []string{"remove", name, "-y"}, commontypes.ExecuteNoTimeout)
 }
 
@@ -81,4 +83,9 @@ func (c *AptPackageManager) CheckPackageInstalled(name string) (output string, e
 		}
 	}
 	return output, packageNotInstalledError
+}
+
+// NeedReboot tells if a reboot is needed after package installation
+func (c *AptPackageManager) NeedReboot() bool {
+	return false
 }

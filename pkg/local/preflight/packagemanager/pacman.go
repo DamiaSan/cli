@@ -23,12 +23,14 @@ func (c *PacmanPackageManager) UpdatePackageList() (string, error) {
 }
 
 // InstallPackage executes the installation command
-func (c *PacmanPackageManager) InstallPackage(name string) (string, error) {
+// first indicates if this is the first package being installed in the current session
+func (c *PacmanPackageManager) InstallPackage(name string, first bool) (string, error) {
 	return c.executor.Execute([]string{}, "pacman", []string{"-S", "--noconfirm", name}, commontypes.ExecuteNoTimeout)
 }
 
 // UninstallPackage executes the uninstallation command
-func (c *PacmanPackageManager) UninstallPackage(name string) (string, error) {
+// first indicates if this is the first package being uninstalled in the current session
+func (c *PacmanPackageManager) UninstallPackage(name string, first bool) (string, error) {
 	return c.executor.Execute([]string{}, "pacman", []string{"-R", "--noconfirm", name}, commontypes.ExecuteNoTimeout)
 }
 
@@ -66,4 +68,9 @@ func (c *PacmanPackageManager) GetServiceStatus(name string) (string, error) {
 // CheckPackageInstalled checks if a package is installed
 func (c *PacmanPackageManager) CheckPackageInstalled(name string) (string, error) {
 	return c.executor.Execute([]string{}, "pacman", []string{"-Q", name}, commontypes.ExecuteNoTimeout)
+}
+
+// NeedReboot tells if a reboot is needed after package installation
+func (c *PacmanPackageManager) NeedReboot() bool {
+	return false
 }
